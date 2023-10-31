@@ -1,0 +1,77 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User Table
+model User {
+  id          String  @id @default(uuid())
+  name        String
+  email       String  @unique
+  password    String
+  profile_url String?
+  role        Int?    @default(0)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  // user_order_one_to_many
+  orders    Order[]
+}
+
+model Product {
+  id          String    @id @default(uuid())
+  name        String
+  price       Float
+  model       String    @unique
+  product_url String?   @default("default_product.png")
+  createdAt   DateTime? @default(now())
+  updatedAt   String?
+  // product_order_one_to_many
+  orders      Order[]
+}
+
+model ProductNew {
+  id          String    @id @default(uuid())
+  name        String
+  price       Float
+  model       String    @unique
+  product_url String?   @default("default_product.png")
+  createdAt   DateTime? @default(now())
+  updatedAt   String?
+  // product_order_one_to_many
+  orders      Order[]
+}
+
+model Order {
+  id            String    @id @default(uuid())
+  qty           Int
+  current_price Float
+  createdAt     DateTime? @default(now())
+  // User Order one_to_many
+  user          User      @relation(fields: [user_id], references: [id])
+  user_id       String
+  // Product Order one_to_many
+  product       Product   @relation(fields: [product_id], references: [id])
+  product_id    String
+
+  // ProductNew Order one_to_many
+  productnew    ProductNew @relation(fields: [productnew_id], references: [id])
+  productnew_id String
+
+  // Order transaction one_to_One
+  transaction Transaction?
+}
+
+model Transaction {
+  id        String    @id @default(uuid())
+  createdAt DateTime? @default(now())
+  // Order transaction One_to_One
+  order     Order     @relation(fields: [order_id], references: [id])
+  order_id  String    @unique
+}
